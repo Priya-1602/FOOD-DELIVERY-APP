@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Restaurant Dashboard - Restaurant Ordering System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Restaurant Info -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="card-title mb-1">{{ restaurant.name }}</h3>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-phone me-1"></i>{{ restaurant.contact }} | 
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ restaurant.location }}
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Menu Management -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-utensils me-2"></i>Menu Management
+                        </h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addMenuItemModal">
+                            <i class="fas fa-plus me-1"></i>Add Item
+                        </button>
+                    </div>
+                    
+                    {% if menu_items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in menu_items %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if item.image %}
+                                                <img src="{{ url_for('static', filename=item.image) }}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                                {% else %}
+                                                <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-utensils text-muted"></i>
+                                                </div>
+                                                {% endif %}
+                                                <div>
+                                                    <strong>{{ item.name }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ item.description[:50] }}...</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ item.category.name }}</td>
+                                        <td>${{ "%.2f"|format(item.price) }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if item.is_available else 'danger' }}">
+                                                {{ 'Available' if item.is_available else 'Out of Stock' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No menu items yet</h5>
+                            <p class="text-muted">Add your first menu item to get started!</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMenuItemModal">
+                                <i class="fas fa-plus me-2"></i>Add Menu Item
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Management -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-clipboard-list me-2"></i>Recent Orders
+                    </h5>
+                    
+                    {% if orders %}
+                        {% for order in orders[:5] %}
+                        <div class="border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong>Order #{{ order.id }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ order.created_at.strftime('%I:%M %p') }}</small>
+                                </div>
+                                <span class="badge bg-{{ 'warning' if order.status == 'pending' else 'success' }}">
+                                    {{ order.status.title() }}
+                                </span>
+                            </div>
+                            <p class="mb-2 small">
+                                {% for item in order.order_items[:2] %}
+                                    {{ item.quantity }}x {{ item.menu_item.name }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                                {% if order.order_items|length > 2 %}
+                                    +{{ order.order_items|length - 2 }} more
+                                {% endif %}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">${{ "%.2f"|format(order.total_amount) }}</span>
+                                <form method="POST" action="{{ url_for('update_order_status') }}" class="d-inline" id="statusForm{{ order.id }}">
+                                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                                    <select name="status" class="form-select form-select-sm" style="width: auto;" 
+                                            onchange="updateOrderStatus({{ order.id }}, this.value)">
+                                        <option value="pending" {{ 'selected' if order.status == 'pending' }}>Pending</option>
+                                        <option value="confirmed" {{ 'selected' if order.status == 'confirmed' }}>Confirmed</option>
+                                        <option value="preparing" {{ 'selected' if order.status == 'preparing' }}>Preparing</option>
+                                        <option value="dispatched" {{ 'selected' if order.status == 'dispatched' }}>Dispatched</option>
+                                        <option value="delivered" {{ 'selected' if order.status == 'delivered' }}>Delivered</option>
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% if orders|length > 5 %}
+                        <div class="text-center">
+                            <a href="#" class="btn btn-outline-primary btn-sm">View All Orders</a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No orders yet</h6>
+                            <p class="text-muted small">Orders will appear here when customers place them.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Menu Item Modal -->
+<div class="modal fade" id="addMenuItemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Menu Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_menu_item') }}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="item_name" class="form-label">Item Name *</label>
+                        <input type="text" class="form-control" id="item_name" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="item_description" class="form-label">Description *</label>
+                        <textarea class="form-control" id="item_description" name="description" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="item_price" class="form-label">Price *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="item_price" name="price" 
+                                       step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="item_category" class="form-label">Category *</label>
+                            <select class="form-select" id="item_category" name="category_id" required>
+                                <option value="">Select category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="item_image" class="form-label">Item Image</label>
+                        <input type="file" class="form-control" id="item_image" name="image" accept="image/*">
+                        <small class="form-text text-muted">Upload a high-quality image (JPG, PNG, GIF). Recommended size: 400x300px</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="item_vegetarian" name="is_vegetarian">
+                            <label class="form-check-label" for="item_vegetarian">
+                                <i class="fas fa-leaf text-success me-1"></i>Vegetarian
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Function to update order status
+function updateOrderStatus(orderId, newStatus) {
+    console.log(`Updating order ${orderId} to status: ${newStatus}`);
+    
+    // Show loading state
+    const select = event.target;
+    const originalValue = select.dataset.originalValue || select.value;
+    select.disabled = true;
+    
+    // Submit the form
+    const form = document.getElementById(`statusForm${orderId}`);
+    if (form) {
+        console.log('Submitting form for order:', orderId);
+        form.submit();
+    } else {
+        console.error('Form not found for order:', orderId);
+        select.disabled = false;
+        select.value = originalValue;
+    }
+}
+
+// Auto-refresh orders 
+setInterval(() => {
+    // This could make AJAX calls to check for new orders
+    console.log('Checking for new orders...');
+}, 30000); // Check every 30 seconds
+
+// Form validation for add menu item
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('#addMenuItemModal form');
+    form.addEventListener('submit', function(e) {
+        const name = document.getElementById('item_name').value;
+        const description = document.getElementById('item_description').value;
+        const price = document.getElementById('item_price').value;
+        const category = document.getElementById('item_category').value;
+        
+        if (!name || !description || !price || !category) {
+            e.preventDefault();
+            alert('Please fill in all required fields!');
+            return false;
+        }
+        
+        if (parseFloat(price) <= 0) {
+            e.preventDefault();
+            alert('Price must be greater than 0!');
+            return false;
+        }
+    });
+    
+    // Store original values for status selects
+    document.querySelectorAll('select[name="status"]').forEach(select => {
+        select.dataset.originalValue = select.value;
+    });
+});
+</script>
+{% endblock %} 

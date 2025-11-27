@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - Restaurant Ordering System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">
+                        <i class="fas fa-credit-card me-2"></i>Checkout
+                    </h3>
+                    
+                    <form method="POST" id="checkoutForm">
+                        <!-- Delivery Information -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-map-marker-alt me-2"></i>Delivery Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="delivery_name" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="delivery_name" 
+                                           value="{{ current_user.name }}" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="delivery_phone" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="delivery_phone" 
+                                           value="{{ current_user.phone }}" readonly>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="delivery_address" class="form-label">Delivery Address *</label>
+                                <textarea class="form-control" id="delivery_address" name="delivery_address" 
+                                          rows="3" required>{{ current_user.address }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="delivery_instructions" class="form-label">Delivery Instructions (Optional)</label>
+                                <textarea class="form-control" id="delivery_instructions" rows="2" 
+                                          placeholder="Any special instructions for delivery..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Method -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-credit-card me-2"></i>Payment Method
+                            </h5>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="payment_cash" value="cash" checked>
+                                <label class="form-check-label" for="payment_cash">
+                                    <i class="fas fa-money-bill-wave me-2"></i>Cash on Delivery
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="payment_card" value="card">
+                                <label class="form-check-label" for="payment_card">
+                                    <i class="fas fa-credit-card me-2"></i>Credit/Debit Card
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="payment_online" value="online">
+                                <label class="form-check-label" for="payment_online">
+                                    <i class="fas fa-university me-2"></i>Online Banking
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Card Details (Hidden by default) -->
+                        <div id="cardDetails" class="mb-4" style="display: none;">
+                            <h6 class="mb-3">Card Details</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="card_number" class="form-label">Card Number</label>
+                                    <input type="text" class="form-control" id="card_number" 
+                                           placeholder="1234 5678 9012 3456">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="expiry" class="form-label">Expiry Date</label>
+                                    <input type="text" class="form-control" id="expiry" placeholder="MM/YY">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" placeholder="123">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Terms and Conditions -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms_agree" required>
+                                <label class="form-check-label" for="terms_agree">
+                                    I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and 
+                                    <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check me-2"></i>Place Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Order Summary -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Order Summary</h5>
+                    
+                    {% for item_data in items %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="mb-0">{{ item_data.item.name }}</h6>
+                            <small class="text-muted">Qty: {{ item_data.quantity }}</small>
+                        </div>
+                        <span>${{ "%.2f"|format(item_data.subtotal) }}</span>
+                    </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>${{ "%.2f"|format(total) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Delivery Fee:</span>
+                        <span>$2.99</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax (8%):</span>
+                        <span>${{ "%.2f"|format(total * 0.08) }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Total:</strong>
+                        <strong class="h5 mb-0">${{ "%.2f"|format(total + 2.99 + total * 0.08) }}</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Delivery Information -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-truck me-2"></i>Delivery Information
+                    </h6>
+                    <div class="mb-2">
+                        <small class="text-muted">Estimated Delivery Time:</small>
+                        <div class="fw-bold">30-45 minutes</div>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted">Delivery Area:</small>
+                        <div class="fw-bold">Within 5 miles</div>
+                    </div>
+                    <div>
+                        <small class="text-muted">Free delivery on orders over $25</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+    const cardDetails = document.getElementById('cardDetails');
+    const form = document.getElementById('checkoutForm');
+    
+    // Show/hide card details based on payment method
+    paymentMethods.forEach(method => {
+        method.addEventListener('change', function() {
+            if (this.value === 'card') {
+                cardDetails.style.display = 'block';
+            } else {
+                cardDetails.style.display = 'none';
+            }
+        });
+    });
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const deliveryAddress = document.getElementById('delivery_address').value;
+        const termsAgree = document.getElementById('terms_agree').checked;
+        
+        if (!deliveryAddress.trim()) {
+            e.preventDefault();
+            alert('Please enter a delivery address!');
+            return false;
+        }
+        
+        if (!termsAgree) {
+            e.preventDefault();
+            alert('Please agree to the terms and conditions!');
+            return false;
+        }
+        
+        // Validate card details if card payment is selected
+        const selectedPayment = document.querySelector('input[name="payment_method"]:checked').value;
+        if (selectedPayment === 'card') {
+            const cardNumber = document.getElementById('card_number').value;
+            const expiry = document.getElementById('expiry').value;
+            const cvv = document.getElementById('cvv').value;
+            
+            if (!cardNumber || !expiry || !cvv) {
+                e.preventDefault();
+                alert('Please fill in all card details!');
+                return false;
+            }
+        }
+    });
+    
+    // Card number formatting
+    const cardNumber = document.getElementById('card_number');
+    if (cardNumber) {
+        cardNumber.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 16) {
+                value = value.substring(0, 16);
+            }
+            // Add spaces every 4 digits
+            value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+            e.target.value = value;
+        });
+    }
+    
+    // Expiry date formatting
+    const expiry = document.getElementById('expiry');
+    if (expiry) {
+        expiry.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 4) {
+                value = value.substring(0, 4);
+            }
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2);
+            }
+            e.target.value = value;
+        });
+    }
+    
+    // CVV formatting
+    const cvv = document.getElementById('cvv');
+    if (cvv) {
+        cvv.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 3) {
+                value = value.substring(0, 3);
+            }
+            e.target.value = value;
+        });
+    }
+});
+</script>
+{% endblock %} 

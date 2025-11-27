@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Restaurant Ordering System{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-4">Delicious Food Delivered to Your Doorstep</h1>
+        <p class="lead mb-5">Order from your favorite restaurants and enjoy fresh, hot meals delivered right to your home.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('menu') }}" class="btn btn-light btn-lg px-4">
+                <i class="fas fa-utensils me-2"></i>Browse Menu
+            </a>
+            <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg px-4">
+                <i class="fas fa-user-plus me-2"></i>Sign Up
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Browse Menu</h5>
+                    <p class="card-text">Explore our extensive menu with various categories including breakfast, lunch, dinner, and more.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-shopping-cart fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Easy Ordering</h5>
+                    <p class="card-text">Add items to your cart, customize your order, and checkout with just a few clicks.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-truck fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Fast Delivery</h5>
+                    <p class="card-text">Track your order in real-time and get notified when your food is on its way.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <h2 class="mb-4">Why Choose Us?</h2>
+            <ul class="list-unstyled">
+                <li class="mb-3">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <strong>Fresh Ingredients:</strong> All our restaurants use fresh, high-quality ingredients
+                </li>
+                <li class="mb-3">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <strong>Fast Delivery:</strong> Get your food delivered within 30-45 minutes
+                </li>
+                <li class="mb-3">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <strong>Secure Payment:</strong> Multiple payment options with secure transactions
+                </li>
+                <li class="mb-3">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <strong>24/7 Support:</strong> Customer support available round the clock
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Get Started Today</h5>
+                    <p class="card-text">Join thousands of satisfied customers who order from us daily.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('register') }}" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

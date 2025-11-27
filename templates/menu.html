@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Menu - Restaurant Ordering System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-filter me-2"></i>Filters
+                    </h5>
+                    
+                    <!-- Search -->
+                    <div class="mb-3">
+                        <label for="searchInput" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search menu items...">
+                    </div>
+                    
+                    <!-- Categories -->
+                    <div class="mb-3">
+                        <label class="form-label">Categories</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="allCategories" checked>
+                            <label class="form-check-label" for="allCategories">All Categories</label>
+                        </div>
+                        {% for category in categories %}
+                        <div class="form-check">
+                            <input class="form-check-input category-filter" type="checkbox" 
+                                   id="category{{ category.id }}" value="{{ category.id }}">
+                            <label class="form-check-label" for="category{{ category.id }}">
+                                {{ category.name }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Dietary Preferences -->
+                    <div class="mb-3">
+                        <label class="form-label">Dietary Preferences</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="vegetarian">
+                            <label class="form-check-label" for="vegetarian">
+                                <i class="fas fa-leaf text-success me-1"></i>Vegetarian
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="nonVegetarian">
+                            <label class="form-check-label" for="nonVegetarian">
+                                <i class="fas fa-drumstick-bite text-danger me-1"></i>Non-Vegetarian
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Range -->
+                    <div class="mb-3">
+                        <label class="form-label">Price Range</label>
+                        <div class="d-flex gap-2">
+                            <input type="number" class="form-control" id="minPrice" placeholder="Min" min="0">
+                            <input type="number" class="form-control" id="maxPrice" placeholder="Max" min="0">
+                        </div>
+                    </div>
+                    
+                    <!-- Clear Filters -->
+                    <button class="btn btn-outline-secondary btn-sm w-100" onclick="clearFilters()">
+                        <i class="fas fa-times me-1"></i>Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menu Items -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Menu Items</h2>
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="sortSelect" style="width: auto;">
+                        <option value="name">Sort by Name</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="popular">Most Popular</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="menuItems" class="row">
+                {% for item in items %}
+                <div class="col-md-6 col-lg-4 mb-4 menu-item-card" 
+                     data-category="{{ item.category.id }}"
+                     data-price="{{ item.price }}"
+                     data-vegetarian="{{ 'true' if item.is_vegetarian else 'false' }}"
+                     data-name="{{ item.name.lower() }}">
+                    <div class="card h-100 menu-item">
+                        {% if item.image %}
+                        <img src="{{ url_for('static', filename=item.image) }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-utensils fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">{{ item.name }}</h5>
+                                <span class="badge bg-{{ 'success' if item.is_vegetarian else 'danger' }}">
+                                    {{ 'Veg' if item.is_vegetarian else 'Non-Veg' }}
+                                </span>
+                            </div>
+                            
+                            <p class="card-text text-muted">{{ item.description[:100] }}{% if item.description|length > 100 %}...{% endif %}</p>
+                            
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="h5 text-primary mb-0">${{ "%.2f"|format(item.price) }}</span>
+                                    <span class="badge bg-{{ 'success' if item.is_available else 'danger' }}">
+                                        {{ 'Available' if item.is_available else 'Out of Stock' }}
+                                    </span>
+                                </div>
+                                
+                                {% if current_user.is_authenticated and current_user.user_type == 'customer' %}
+                                <form method="POST" action="{{ url_for('add_to_cart') }}" class="d-flex gap-2">
+                                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                                    <input type="number" name="quantity" value="1" min="1" max="10" 
+                                           class="form-control" style="width: 80px;">
+                                    <button type="submit" class="btn btn-primary flex-fill" 
+                                            {{ 'disabled' if not item.is_available }}>
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </form>
+                                {% elif not current_user.is_authenticated %}
+                                <div class="alert alert-info mb-0">
+                                    <small><i class="fas fa-info-circle me-1"></i>Please login to order</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- No Results Message -->
+            <div id="noResults" class="text-center py-5" style="display: none;">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No items found</h4>
+                <p class="text-muted">Try adjusting your filters or search terms.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilters = document.querySelectorAll('.category-filter');
+    const allCategoriesCheckbox = document.getElementById('allCategories');
+    const vegetarianCheckbox = document.getElementById('vegetarian');
+    const nonVegetarianCheckbox = document.getElementById('nonVegetarian');
+    const minPriceInput = document.getElementById('minPrice');
+    const maxPriceInput = document.getElementById('maxPrice');
+    const sortSelect = document.getElementById('sortSelect');
+    const menuItems = document.querySelectorAll('.menu-item-card');
+    const noResults = document.getElementById('noResults');
+    
+    // Filter functions
+    function filterItems() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedCategories = Array.from(categoryFilters)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        const showVegetarian = vegetarianCheckbox.checked;
+        const showNonVegetarian = nonVegetarianCheckbox.checked;
+        const minPrice = parseFloat(minPriceInput.value) || 0;
+        const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
+        
+        let visibleCount = 0;
+        
+        menuItems.forEach(item => {
+            const name = item.dataset.name;
+            const category = item.dataset.category;
+            const price = parseFloat(item.dataset.price);
+            const isVegetarian = item.dataset.vegetarian === 'true';
+            
+            // Search filter
+            const matchesSearch = name.includes(searchTerm);
+            
+            // Category filter
+            const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(category);
+            
+            // Dietary filter
+            let matchesDietary = true;
+            if (showVegetarian && showNonVegetarian) {
+                matchesDietary = true;
+            } else if (showVegetarian) {
+                matchesDietary = isVegetarian;
+            } else if (showNonVegetarian) {
+                matchesDietary = !isVegetarian;
+            }
+            
+            // Price filter
+            const matchesPrice = price >= minPrice && price <= maxPrice;
+            
+            const isVisible = matchesSearch && matchesCategory && matchesDietary && matchesPrice;
+            
+            if (isVisible) {
+                item.style.display = 'block';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Show/hide no results message
+        if (visibleCount === 0) {
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+        }
+    }
+    
+    // Sort function
+    function sortItems() {
+        const sortBy = sortSelect.value;
+        const container = document.getElementById('menuItems');
+        const items = Array.from(menuItems);
+        
+        items.sort((a, b) => {
+            const nameA = a.dataset.name;
+            const nameB = b.dataset.name;
+            const priceA = parseFloat(a.dataset.price);
+            const priceB = parseFloat(b.dataset.price);
+            
+            switch (sortBy) {
+                case 'name':
+                    return nameA.localeCompare(nameB);
+                case 'price-low':
+                    return priceA - priceB;
+                case 'price-high':
+                    return priceB - priceA;
+                case 'popular':
+                    // For now, just sort by name (you could add popularity data later)
+                    return nameA.localeCompare(nameB);
+                default:
+                    return 0;
+            }
+        });
+        
+        items.forEach(item => container.appendChild(item));
+    }
+    
+    // Event listeners
+    searchInput.addEventListener('input', filterItems);
+    categoryFilters.forEach(filter => filter.addEventListener('change', filterItems));
+    allCategoriesCheckbox.addEventListener('change', function() {
+        categoryFilters.forEach(cb => cb.checked = this.checked);
+        filterItems();
+    });
+    vegetarianCheckbox.addEventListener('change', filterItems);
+    nonVegetarianCheckbox.addEventListener('change', filterItems);
+    minPriceInput.addEventListener('input', filterItems);
+    maxPriceInput.addEventListener('input', filterItems);
+    sortSelect.addEventListener('change', sortItems);
+    
+    // Initialize filters
+    filterItems();
+});
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('allCategories').checked = true;
+    document.querySelectorAll('.category-filter').forEach(cb => cb.checked = false);
+    document.getElementById('vegetarian').checked = false;
+    document.getElementById('nonVegetarian').checked = false;
+    document.getElementById('minPrice').value = '';
+    document.getElementById('maxPrice').value = '';
+    document.getElementById('sortSelect').value = 'name';
+    
+    // Trigger filter update
+    document.getElementById('searchInput').dispatchEvent(new Event('input'));
+}
+</script>
+{% endblock %} 

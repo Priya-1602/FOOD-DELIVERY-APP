@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Restaurant Ordering System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                    <h4 class="card-title">{{ users|length }}</h4>
+                    <p class="card-text text-muted">Total Users</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-utensils fa-2x text-success mb-2"></i>
+                    <h4 class="card-title">{{ restaurants|length }}</h4>
+                    <p class="card-text text-muted">Restaurants</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-shopping-cart fa-2x text-warning mb-2"></i>
+                    <h4 class="card-title">{{ orders|length }}</h4>
+                    <p class="card-text text-muted">Total Orders</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-dollar-sign fa-2x text-info mb-2"></i>
+                    <h4 class="card-title">${{ "%.2f"|format(orders|sum(attribute='total_amount')) }}</h4>
+                    <p class="card-text text-muted">Total Revenue</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- User Management -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-users me-2"></i>User Management
+                    </h5>
+                    
+                    {% if users %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Type</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users[:5] %}
+                                    <tr>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'primary' if user.user_type == 'customer' else 'success' if user.user_type == 'restaurant' else 'danger' }}">
+                                                {{ user.user_type.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        {% if users|length > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="#" class="btn btn-outline-primary btn-sm">View All Users</a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <p class="text-muted mb-0">No users found</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Restaurant Management -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-utensils me-2"></i>Restaurant Management
+                    </h5>
+                    
+                    {% if restaurants %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Contact</th>
+                                        <th>Location</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for restaurant in restaurants[:5] %}
+                                    <tr>
+                                        <td>{{ restaurant.name }}</td>
+                                        <td>{{ restaurant.contact }}</td>
+                                        <td>{{ restaurant.location[:30] }}...</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        {% if restaurants|length > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="#" class="btn btn-outline-primary btn-sm">View All Restaurants</a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <p class="text-muted mb-0">No restaurants found</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Orders -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-clipboard-list me-2"></i>Recent Orders
+                    </h5>
+                    
+                    {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Restaurant</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders[:10] %}
+                                    <tr>
+                                        <td>
+                                            <strong>#{{ order.id }}</strong>
+                                        </td>
+                                        <td>{{ order.user.name }}</td>
+                                        <td>{{ order.restaurant.name }}</td>
+                                        <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                                        <td>
+                                            {% set status_colors = {
+                                                'pending': 'warning',
+                                                'confirmed': 'info',
+                                                'preparing': 'primary',
+                                                'dispatched': 'info',
+                                                'delivered': 'success',
+                                                'cancelled': 'danger'
+                                            } %}
+                                            <span class="badge bg-{{ status_colors.get(order.status, 'secondary') }}">
+                                                {{ order.status.title() }}
+                                            </span>
+                                        </td>
+                                        <td>{{ order.created_at.strftime('%m/%d/%Y %I:%M %p') }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        {% if orders|length > 10 %}
+                        <div class="text-center mt-3">
+                            <a href="#" class="btn btn-outline-primary btn-sm">View All Orders</a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No orders found</h6>
+                            <p class="text-muted small">Orders will appear here when customers place them.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-cogs me-2"></i>System Actions
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#addRestaurantModal">
+                                <i class="fas fa-plus me-2"></i>Add Restaurant
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button class="btn btn-outline-success w-100">
+                                <i class="fas fa-download me-2"></i>Export Data
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button class="btn btn-outline-warning w-100">
+                                <i class="fas fa-cog me-2"></i>System Settings
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button class="btn btn-outline-info w-100">
+                                <i class="fas fa-chart-bar me-2"></i>Analytics
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Restaurant Modal -->
+<div class="modal fade" id="addRestaurantModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Restaurant</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="restaurant_name" class="form-label">Restaurant Name *</label>
+                        <input type="text" class="form-control" id="restaurant_name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="restaurant_contact" class="form-label">Contact Number *</label>
+                        <input type="tel" class="form-control" id="restaurant_contact" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="restaurant_location" class="form-label">Location *</label>
+                        <textarea class="form-control" id="restaurant_location" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="restaurant_owner" class="form-label">Owner Email *</label>
+                        <input type="email" class="form-control" id="restaurant_owner" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Restaurant</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-refresh dashboard data (optional)
+setInterval(() => {
+    // This could make AJAX calls to update statistics
+    console.log('Refreshing dashboard data...');
+}, 60000); // Check every minute
+
+// Form validation for add restaurant
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('#addRestaurantModal form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const name = document.getElementById('restaurant_name').value;
+            const contact = document.getElementById('restaurant_contact').value;
+            const location = document.getElementById('restaurant_location').value;
+            const owner = document.getElementById('restaurant_owner').value;
+            
+            if (!name || !contact || !location || !owner) {
+                e.preventDefault();
+                alert('Please fill in all required fields!');
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 
