@@ -1,57 +1,139 @@
-🧠EXPLAINABLE BRAIN TUMOR ANALYSIS Project
-License: MIT PRs Welcome Open Source Love
+🍔 Online Food Ordering System
 
-A powerful and intuitive data analysis and visualization tool that brings your data to life.
+License: MIT  PRs Welcome  Open Source ❤️
+
+A modern, lightweight, and responsive full-stack web application for seamless online food ordering.
 
 ✨ Features
-Interactive Visualizations - Create beautiful, interactive charts and graphs
-Data Analysis - Powerful tools for data processing and analysis
-User-Friendly Interface - Intuitive HTML-based interface
-Responsive Design - Works on desktop and tablet devices
-Export Options - Save your visualizations in multiple formats
+👤 User Features
+
+🔐 Secure Login & Registration (JWT)
+
+🍽️ Browse menu with categories & filters (Veg/Non-veg, price range)
+
+🛒 Add to cart, update items, remove items
+
+⚡ Fast Checkout with shipping details
+
+📦 Order tracking with real-time email notifications
+
+🔍 Smart Search with auto suggestions
+
+🧾 View order history
+
+🏪 Restaurant Features
+
+🔑 Restaurant login
+
+➕ Add/Edit/Delete menu items
+
+💲 Manage prices, discounts, and item availability
+
+📊 View and update order statuses
+
+📜 Order history view per restaurant
+
+🛠️ Admin Features
+
+🏢 Add/Remove restaurants
+
+👥 Manage user and restaurant accounts
+
+📋 Global view of all menus and orders
+
+🔐 Security
+
+JWT-based Authentication & Authorization
+
+Role-based access control (User / Restaurant / Admin)
+
+Secure API endpoints
+
 🚀 Getting Started
 Prerequisites
-Modern web browser (Chrome, Firefox, Safari, or Edge)
-Internet connection (for CDN-hosted libraries)
-Installation
-Clone the repository:
-git clone https://github.com/yourusername/BRAIN.git
-Navigate to the project directory:
-cd BRAIN
-Open analysis.html in your preferred web browser to launch the application.
-📂 Project Structure
-BRAIN/
-├── analysis.html      # Main application interface
-├── css/               # Stylesheets
-│   └── style.css
-├── js/                # JavaScript files
-│   └── main.js
-├── data/              # Sample data files
-│   └── sample.csv
-└── README.md          # This file
-🛠️ Usage
-Load your dataset using the file uploader
-Select visualization type from the sidebar
-Customize your visualization using the control panel
-Export or save your results
-🤝 Contributing
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.
 
-Fork the Project
-Create your Feature Branch (git checkout -b feature/AmazingFeature)
-Commit your Changes (git commit -m 'Add some AmazingFeature')
-Push to the Branch (git push origin feature/AmazingFeature)
+Python 3.8+
+
+Flask
+
+MySQL
+
+Modern Browser (Chrome/Firefox/Edge/Safari)
+
+🔧 Installation
+# Clone the repository
+git clone https://github.com/yourusername/Food-Ordering-System.git
+
+# Navigate to backend
+cd backend
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run server
+python app.py
+
+Frontend
+
+Just open the HTML files in any browser or use Live Server (VS Code).
+
+📂 Project Structure
+Food-Ordering-System/
+├── frontend/
+│   ├── index.html           # Landing page
+│   ├── login.html
+│   ├── register.html
+│   ├── menu.html
+│   ├── cart.html
+│   ├── order.html
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│       └── main.js
+│
+├── backend/
+│   ├── app.py               # Main Flask API
+│   ├── models.py
+│   ├── routes/
+│   ├── services/
+│   ├── config.py
+│   ├── static/
+│   └── templates/
+│
+└── README.md
+
+🛠️ Usage
+
+Register or login as User, Restaurant, or Admin
+
+Browse menu categories
+
+Add items to your cart
+
+Checkout & place order
+
+Restaurants manage dishes & update order statuses
+
+Admin oversees users, restaurants & menus
+
+🤝 Contributing
+
+Contributions are welcome! ❤️
+
+Fork the repo
+Create a feature branch  → git checkout -b feature/NewFeature
+Commit your changes       → git commit -m "Add NewFeature"
+Push to GitHub            → git push origin feature/NewFeature
 Open a Pull Request
+
 📄 License
-Distributed under the MIT License. See LICENSE for more information.
+
+Distributed under the MIT License.
+See LICENSE for details.
 
 📧 Contact
-Your Name - @yourtwitter - email@example.com
 
-Project Link: https://github.com/yourusername/BRAIN
+Your Name
+📩 yourmail@example.com
 
-🙏 Acknowledgments
-Choose an Open Source License
-GitHub Emoji Cheat Sheet
-Img Shields
-Best-README-Template
+🐦 @yourtwitter
